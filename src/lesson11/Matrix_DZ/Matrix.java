@@ -1,6 +1,7 @@
 package lesson11.Matrix_DZ;
 
-import lesson11.Person;
+
+import lesson5.MathOperations;
 
 public class Matrix implements IMatrix {
     private double[][] matrix;
@@ -64,95 +65,184 @@ public class Matrix implements IMatrix {
         if (this.getRows() == otherMatrix.getRows() && this.getColumns() == otherMatrix.getColumns()) {
             Matrix result = new Matrix(this.getRows(), this.getColumns());
             for (int i = 0; i < result.getRows(); i++) {
+                for (int j = 0; j < result.getColumns(); j++) {
+                    result.setValueAt(i, j, this.getValueAt(i, j) + otherMatrix.getValueAt(i, j));
+                }
+            }
+            return result;
+        } else {
+            System.out.println("размеры матриц не совпадают");
+        }
+        return null;
+    }
+
+    @Override
+    public IMatrix sub(IMatrix otherMatrix) throws IllegalArgumentException, NullPointerException {
+        if (this.getRows() == otherMatrix.getRows() && this.getColumns() == otherMatrix.getColumns()) {
+            Matrix result = new Matrix(this.getRows(), this.getColumns());
+            for (int i = 0; i < result.getRows(); i++) {
+                for (int j = 0; j < result.getColumns(); j++) {
+                    result.setValueAt(i, j, this.getValueAt(i, j) - otherMatrix.getValueAt(i, j));
+                }
+            }
+            return result;
+        } else {
+            System.out.println("размеры матриц не совпадают");
+        }
+        return null;
+    }
+
+    @Override
+    public IMatrix mul(IMatrix otherMatrix) throws IllegalArgumentException, NullPointerException {
+        if (this.getRows() == otherMatrix.getColumns() && this.getColumns() == otherMatrix.getRows()) {
+            Matrix result = new Matrix(this.getRows(), this.getColumns());
+            for (int i = 0; i < result.getRows(); i++) {
+                for (int j = 0; j < result.getColumns(); j++) {
+                    result.setValueAt(i, j, this.getValueAt(i, j) * otherMatrix.getValueAt(i, j));
+                }
+            }
+            return result;
+        } else {
+            System.out.println("при умножении одной матрицы на другую, длина одной должна быть равна высоте другой");
+        }
+        return null;
+    }
+
+    @Override
+    public IMatrix mul(double value) {
+        Matrix result = new Matrix(this.getRows(), this.getColumns());
+        for (int i = 0; i < result.getRows(); i++) {
             for (int j = 0; j < result.getColumns(); j++) {
-                result.setValueAt(i, j, this.getValueAt(i, j) + otherMatrix.getValueAt(i, j));
+                result.setValueAt(i, j, this.getValueAt(i, j) * value);
             }
         }
         return result;
     }
-        else {
-            System.out.println("размеры матриц не совпадают");
+
+    @Override
+    public IMatrix transpose() {
+        Matrix result = new Matrix(this.getColumns(), this.getRows());
+        for (int i = 0; i < result.getRows(); i++) {
+            for (int j = 0; j < result.getColumns(); j++) {
+                result.setValueAt(i, j, this.getValueAt(j, i));
+            }
         }
-
-    @Override
-    public Matrix[][] sub(IMatrix otherMatrix) throws IllegalArgumentException, NullPointerException {
-        Matrix[][] m = new Matrix[this.rows - otherMatrix.getRows()][this.columns - otherMatrix.getColumns()];
-        return m;
-    }
-
-    @Override
-    public Matrix[][] mul(IMatrix otherMatrix) throws IllegalArgumentException, NullPointerException {
-        Matrix[][] m = new Matrix[this.rows * otherMatrix.getRows()][this.columns * otherMatrix.getColumns()];
-        return m;
-    }
-
-    @Override
-    public Matrix[][] mul(double value) {
-        Matrix[][] m = new Matrix[(int) (this.rows * value)][(int) (this.columns * value)];
-        return m;
-    }
-
-    @Override
-    public double transpose() {
-        return matrix[getRows() / this.getRows()][getColumns() / this.getColumns()];
+        return result;
     }
 
     @Override
     public void fillMatrix(double value) {
-        for (int i = 0; i < this.matrix.length; i++) {
-            for (int j = 0; j < this.matrix[i].length; j++) {
-                matrix[i][j] = value;
+        for (int i = 0; i < this.getRows(); i++) {
+            for (int j = 0; j < this.getColumns(); j++) {
+                this.setValueAt(i, j, value);
+                System.out.print(this.matrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public double[][] generateSubArray(double matrix[][], int columns, int j1) {
+        double[][] m = new double[getColumns() - 1][];
+        for (int i = 0; i < (getColumns() - 1); i++)
+            m[i] = new double[getColumns() - 1];
+
+        for (int i = 1; i < getColumns(); i++) {
+            int j2 = 0;
+            for (int j = 0; j < getColumns(); j++) {
+                if (j == j1)
+                    continue;
+                m[i - 1][j2] = this.matrix[i][j];
+                j2++;
             }
         }
+        return m;
+    }
+
+    private Matrix minorMatrix(int colIndex, Matrix matrix) {
+        int size = matrix.getRows();
+        double[][] tmpArray = new double[size - 1][size - 1];
+        for (int i = 1; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (j < colIndex) {
+                    tmpArray[i - 1][j] = matrix.getValueAt(i, j);
+                } else if (j != colIndex) {
+                    tmpArray[i - 1][j - 1] = matrix.getValueAt(i, j);
+                }
+            }
+        }
+        return new Matrix(tmpArray);
     }
 
     @Override
     public double determinant() {
-        return 0;
+        double determinant = 0;
+        if (isSquareMatrix()) {
+            if (this.getRows() == 1) {
+                determinant = this.matrix[0][0];
+            }
+            if (this.getRows() == 2) {
+                determinant = this.matrix[0][0] * this.matrix[1][1] - this.matrix[1][0] * this.matrix[0][1];
+            } else {
+                for (int i = 0; i < getColumns(); i++) {
+                    double val = getValueAt(0, i);
+                    Matrix minor = minorMatrix(i, this);
+                    double det = minor.determinant();
+                    if (i % 2 == 0) {
+                        determinant += val * det;
+                    } else {
+                        determinant -= val * det;
+                    }
+                }
+            }
+        } else {
+            System.out.println("матрица не квадратная");
+        }
+        return determinant;
     }
 
     @Override
     public boolean isNullMatrix() {
-        boolean x = true;
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[i].length; j++) {
-                if (matrix[i][j] != 0) {
-                    x = false;
+        for (int i = 0; i < this.getRows(); i++) {
+            for (int j = 0; j < this.getColumns(); j++) {
+                if (this.matrix[i][j] != 0) {
+                    return false;
                 }
             }
         }
-        return x;
+        return true;
     }
 
     @Override
     public boolean isIdentityMatrix() {
-        boolean x = true;
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[i].length; j++) {
-                if ((i == j && (matrix[i][j] != 1)) || (i != j && (matrix[i][j] != 0))) {
-                    x = false;
+        for (int i = 0; i < getRows(); i++) {
+            for (int j = 0; j < getColumns(); j++) {
+                if ((i == j && this.matrix[i][j] != 1) || (i != j && this.matrix[i][j] != 0)) {
+                    return false;
+                } else {
+                    return true;
                 }
             }
         }
-        return x;
+        return true;
     }
 
     @Override
     public boolean isSquareMatrix() {
-        boolean x = false;
-        if (getColumns() == getRows()) {
-            x = true;
+        if (this.matrix.length == this.matrix[0].length) {
+            return true;
+        } else {
+            return false;
         }
-        return x;
     }
 
     @Override
     public void printToConsole() {
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix[i].length; j++) {
+        for (int i = 0; i < this.getRows(); i++) {
+            for (int j = 0; j < this.getColumns(); j++) {
                 System.out.print(matrix[i][j] + " ");
             }
             System.out.println();
         }
+
     }
 }
