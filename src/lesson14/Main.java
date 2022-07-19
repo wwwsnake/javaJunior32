@@ -45,6 +45,7 @@ public class Main {
     }
 
     public static void checkProxy(String ip, int port) {
+        //ДЗ: читаем файл, сохраняем в новый через 1 строку
         try {
             FileInputStream fin = new FileInputStream("C://Java/ip.txt");
             FileOutputStream fos = new FileOutputStream("C://Java/sortedIP.txt");

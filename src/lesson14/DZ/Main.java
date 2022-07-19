@@ -1,5 +1,6 @@
 package lesson14.DZ;
 //домашка 14 урока в отдельном файле
+//ДЗ: читаем файл, сохраняем в новый через 1 строку
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
