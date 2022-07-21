@@ -1,7 +1,7 @@
 package lesson14;
 
 //проверка рабочих прокси-серверов. программа отправляет запрос по айпи и порту, если ответ есть, то рабочий
-
+//ДЗ: рабочие ip в отдельный файл, реализовать checkProxy  2 остальными способами мнгопоточность
 import java.io.*;
 import java.net.*;
 
@@ -29,7 +29,13 @@ public class Main {
                 } else if (i == 10) {
                     String ip = result.split(":")[0];
                     int port = Integer.parseInt(result.split(":")[1]);
-                    checkProxy(ip, port);
+                    Thread thread = new Thread((new Runnable() { //многопоточность через анонимные классы
+                        @Override
+                        public void run() {
+                            checkProxy(ip, port);
+                        }
+                    }));
+                    thread.start();
                     result = "";
                 } else if (i == 9) { //9 это пробел в байт-коде. в переменную до нее сохраняется айпишник, после порт через : (таблица ascii)
 
