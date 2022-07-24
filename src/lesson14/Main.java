@@ -2,6 +2,7 @@ package lesson14;
 
 //проверка рабочих прокси-серверов. программа отправляет запрос по айпи и порту, если ответ есть, то рабочий
 //ДЗ: рабочие ip в отдельный файл, реализовать checkProxy  2 остальными способами мнгопоточность
+
 import java.io.*;
 import java.net.*;
 
@@ -29,12 +30,15 @@ public class Main {
                 } else if (i == 10) {
                     String ip = result.split(":")[0];
                     int port = Integer.parseInt(result.split(":")[1]);
-                    Thread thread = new Thread((new Runnable() { //многопоточность через анонимные классы
-                        @Override
-                        public void run() {
-                            checkProxy(ip, port);
-                        }
-                    }));
+//                    Thread thread = new Thread((new Runnable() { //многопоточность через анонимные классы
+//                        @Override
+//                        public void run() {
+//
+//                            checkProxy(ip, port);
+//                        }
+//                    }));
+                    //                   Thread thread = new Thread(new MyRunnableClass(ip,port));
+                    MyThread thread = new MyThread(ip, port);
                     thread.start();
                     result = "";
                 } else if (i == 9) { //9 это пробел в байт-коде. в переменную до нее сохраняется айпишник, после порт через : (таблица ascii)
@@ -80,12 +84,16 @@ public class Main {
 
         System.out.println("Request to server " + ip + ":" + port);
         try {
+            FileOutputStream fos = new FileOutputStream("C://Java/aliveProxy.txt",true);
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(ip, port));
             URL url = new URL("http://vozhzhaev.ru/test.php");
             URLConnection connection = url.openConnection(proxy);
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream())); //чтение ответа от сервера
             System.out.println("ip " + ip + " port " + port + " - работает!");
             System.out.println();
+            String writeToFile = ip + " : " + port+"\n";
+            byte[] buffer = writeToFile.getBytes();
+            fos.write(buffer, 0, buffer.length);
         } catch (Exception e) {
             System.out.println("ip " + ip + " port " + port + " - не работает!");
             System.out.println();

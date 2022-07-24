@@ -29,9 +29,9 @@ public class MultiThread {
                 }
             }
         });
-//        Thread thread1 = new Thread(new MyRunnadleClass("Мыть посуду"));
-//        Thread thread2 = new Thread(new MyRunnadleClass("Пылесосить"));
-//        Thread thread3= new Thread(new MyRunnadleClass("Мыть полы"));
+//        Thread thread1 = new Thread(new MyRunnableClass("Мыть посуду"));
+//        Thread thread2 = new Thread(new MyRunnableClass("Пылесосить"));
+//        Thread thread3= new Thread(new MyRunnableClass("Мыть полы"));
 //        MyThread thread1 = new MyThread("мыть посуду");
 //        MyThread thread2 = new MyThread("пылесосить");
 //        MyThread thread3 = new MyThread("мыть полы");
